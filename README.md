@@ -1,4 +1,4 @@
-<img src="./imgs/logo.svg" width="512" height="100" align="right" />
+<img src="./imgs/logo.svg" width="512" align="right" />
 # Rustyroll
 
 ## To-Do
