@@ -46,4 +46,22 @@ impl CrunchyrollClient {
             client: client,
         }
     }
+    pub async fn refresh(&mut self) {
+        let mut params = HashMap::new();
+        params.insert("refresh_token", self.user.refresh_token.as_ref().unwrap().as_str());
+        params.insert("grant_type", "refresh_token");
+        params.insert("scope", "offline_access");
+        let user = self
+            .client
+            .post(&format!("{}/auth/v1/token", self.base_url))
+            .header("Authorization", &format!("Basic {}", self.api_key))
+            .form(&params)
+            .send()
+            .await
+            .unwrap()
+            .json::<User>()
+            .await
+            .unwrap();
+        self.user = user;
+    }
 }
