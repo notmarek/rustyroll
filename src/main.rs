@@ -13,6 +13,7 @@ async fn main() {
         "password",
     )
     .await;
+    println!("{:#?}", cr.cms);
 
     println!("{:#?}", cr.user);
     cr.refresh().await;

@@ -7,6 +7,7 @@ pub struct CrunchyrollClient {
     pub api_key: String,
     pub user: User,
     pub client: reqwest::Client,
+    pub cms: Option<CMSwrapper>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -17,6 +18,21 @@ pub struct User {
     pub scope: Option<String>,
     pub country: Option<String>,
     pub expires_in: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CMS {
+    pub bucket: Option<String>, 
+    pub policy: Option<String>,
+    pub signature: Option<String>,
+    pub key_pair_id: Option<String>,
+    pub expires: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CMSwrapper {
+    pub cms: Option<CMS>,
+    pub service_available: Option<bool>,
 }
 
 impl CrunchyrollClient {
@@ -39,12 +55,15 @@ impl CrunchyrollClient {
             .json::<User>()
             .await
             .unwrap();
-        CrunchyrollClient {
+        let mut future_self = CrunchyrollClient {
             api_key: api_key,
             base_url: base_url,
             user: user,
             client: client,
-        }
+            cms: None,
+        };
+        future_self.load_cms_info().await;
+        future_self
     }
     pub async fn refresh(&mut self) {
         let mut params = HashMap::new();
@@ -63,5 +82,18 @@ impl CrunchyrollClient {
             .await
             .unwrap();
         self.user = user;
+    }
+    async fn load_cms_info(&mut self) {
+        let cms = self
+            .client
+            .get(&format!("{}/index/v2", self.base_url))
+            .header("Authorization", &format!("Bearer {}", self.user.access_token.as_ref().unwrap()))
+            .send()
+            .await
+            .unwrap()
+            .json::<CMSwrapper>()
+            .await
+            .unwrap();
+        self.cms = Some(cms);
     }
 }
