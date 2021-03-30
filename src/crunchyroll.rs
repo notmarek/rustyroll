@@ -5,7 +5,7 @@ use std::collections::HashMap;
 pub struct CrunchyrollClient {
     pub base_url: String,
     pub api_key: String,
-    pub user: User,
+    pub user: Option<User>,
     pub client: reqwest::Client,
     pub cms: Option<CMSwrapper>,
 }
@@ -22,7 +22,7 @@ pub struct User {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CMS {
-    pub bucket: Option<String>, 
+    pub bucket: Option<String>,
     pub policy: Option<String>,
     pub signature: Option<String>,
     pub key_pair_id: Option<String>,
@@ -40,60 +40,68 @@ impl CrunchyrollClient {
         let mut headers = header::HeaderMap::new();
         headers.insert(header::USER_AGENT, header::HeaderValue::from_str(ua).unwrap());
         let client = reqwest::Client::builder().default_headers(headers).build().unwrap();
-        let mut params = HashMap::new();
-        params.insert("username", username);
-        params.insert("password", password);
-        params.insert("grant_type", "password");
-        params.insert("scope", "offline_access");
-        let user = client
-            .post(&format!("{}/auth/v1/token", base_url))
-            .header("Authorization", &format!("Basic {}", api_key))
-            .form(&params)
-            .send()
-            .await
-            .unwrap()
-            .json::<User>()
-            .await
-            .unwrap();
         let mut future_self = CrunchyrollClient {
             api_key: api_key,
             base_url: base_url,
-            user: user,
+            user: None,
             client: client,
             cms: None,
         };
+        future_self.load_user(username, password).await;
         future_self.load_cms_info().await;
         future_self
     }
     pub async fn refresh(&mut self) {
         let mut params = HashMap::new();
-        params.insert("refresh_token", self.user.refresh_token.as_ref().unwrap().as_str());
+        params.insert("refresh_token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap().as_str());
         params.insert("grant_type", "refresh_token");
         params.insert("scope", "offline_access");
-        let user = self
-            .client
-            .post(&format!("{}/auth/v1/token", self.base_url))
-            .header("Authorization", &format!("Basic {}", self.api_key))
-            .form(&params)
-            .send()
-            .await
-            .unwrap()
-            .json::<User>()
-            .await
-            .unwrap();
-        self.user = user;
+        self.user = Some(
+            self.client
+                .post(&format!("{}/auth/v1/token", self.base_url))
+                .header("Authorization", &format!("Basic {}", self.api_key))
+                .form(&params)
+                .send()
+                .await
+                .unwrap()
+                .json::<User>()
+                .await
+                .unwrap(),
+        );
+    }
+    async fn load_user(&mut self, username: &str, password: &str) {
+        let mut params = HashMap::new();
+        params.insert("username", username);
+        params.insert("password", password);
+        params.insert("grant_type", "password");
+        params.insert("scope", "offline_access");
+        self.user = Some(
+            self.client
+                .post(&format!("{}/auth/v1/token", self.base_url))
+                .header("Authorization", &format!("Basic {}", self.api_key))
+                .form(&params)
+                .send()
+                .await
+                .unwrap()
+                .json::<User>()
+                .await
+                .unwrap(),
+        );
     }
     async fn load_cms_info(&mut self) {
-        let cms = self
-            .client
-            .get(&format!("{}/index/v2", self.base_url))
-            .header("Authorization", &format!("Bearer {}", self.user.access_token.as_ref().unwrap()))
-            .send()
-            .await
-            .unwrap()
-            .json::<CMSwrapper>()
-            .await
-            .unwrap();
-        self.cms = Some(cms);
+        self.cms = Some(
+            self.client
+                .get(&format!("{}/index/v2", self.base_url))
+                .header(
+                    "Authorization",
+                    &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+                )
+                .send()
+                .await
+                .unwrap()
+                .json::<CMSwrapper>()
+                .await
+                .unwrap(),
+        );
     }
 }
