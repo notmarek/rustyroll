@@ -51,6 +51,7 @@ impl CrunchyrollClient {
         future_self.load_cms_info().await;
         future_self
     }
+
     pub async fn refresh(&mut self) {
         let mut params = HashMap::new();
         params.insert("refresh_token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap().as_str());
