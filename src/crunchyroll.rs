@@ -1,5 +1,5 @@
+use crate::models::*;
 use reqwest::header;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub struct CrunchyrollClient {
@@ -8,31 +8,6 @@ pub struct CrunchyrollClient {
     pub user: Option<User>,
     pub client: reqwest::Client,
     pub cms: Option<CMSwrapper>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct User {
-    pub access_token: Option<String>,
-    pub refresh_token: Option<String>,
-    pub token_type: Option<String>,
-    pub scope: Option<String>,
-    pub country: Option<String>,
-    pub expires_in: Option<u32>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CMS {
-    pub bucket: Option<String>,
-    pub policy: Option<String>,
-    pub signature: Option<String>,
-    pub key_pair_id: Option<String>,
-    pub expires: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CMSwrapper {
-    pub cms: Option<CMS>,
-    pub service_available: Option<bool>,
 }
 
 impl CrunchyrollClient {
@@ -104,5 +79,19 @@ impl CrunchyrollClient {
                 .await
                 .unwrap(),
         );
+    }
+    pub async fn search(self, query: &str) -> Search {
+        self.client
+            .get(&format!("{}/content/v1/search?q={}&n=3&locale=en-US", self.base_url, query))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Search>()
+            .await
+            .unwrap()
     }
 }
