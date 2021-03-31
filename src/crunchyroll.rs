@@ -80,7 +80,7 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
-    pub async fn search(self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
+    pub async fn search(&self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
         self.client
             .get(&format!("{}/content/v1/search?q={}&n=3&locale=en-US", self.base_url, query))
             .header(
@@ -91,6 +91,29 @@ impl CrunchyrollClient {
             .await
             .unwrap()
             .json::<Wrapper<Wrapper<SearchItem>>>()
+            .await
+            .unwrap()
+    }
+    pub async fn get_series(&self, series_id: &str) -> Series {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}/cms/v2{}/series/{}?Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                cms.bucket.as_ref().unwrap(),
+                series_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Series>()
             .await
             .unwrap()
     }

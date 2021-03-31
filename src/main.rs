@@ -20,4 +20,5 @@ async fn main() {
     cr.refresh().await;
     println!("{:#?}", cr.user);
     println!("{:#?}", cr.search("slime").await);
+    println!("{:#?}", cr.get_series("GRDKVP34Y").await);
 }

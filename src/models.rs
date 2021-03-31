@@ -70,6 +70,12 @@ pub struct Links {
     #[serde(rename = "resource/channel")]
     #[serde(flatten)]
     pub resource_channel: Option<String>,
+    #[serde(rename = "series/channel")]
+    #[serde(flatten)]
+    pub series_channel: Option<String>,
+    #[serde(rename = "series/season")]
+    #[serde(flatten)]
+    pub series_season: Option<String>,
     #[serde(rename = "episode/season")]
     #[serde(flatten)]
     pub episode_season: Option<String>,
@@ -162,4 +168,39 @@ pub struct CMS {
 pub struct CMSwrapper {
     pub cms: Option<CMS>,
     pub service_available: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Series {
+    #[serde(rename = "__actions__")]
+    pub actions: Option<PlaceholderEmpty>,
+    #[serde(rename = "__class__")]
+    pub class: Option<String>,
+    #[serde(rename = "__href__")]
+    pub href: Option<String>,
+    #[serde(rename = "__resource_key__")]
+    pub resource_key: Option<String>,
+    #[serde(rename = "__links__")]
+    pub links: Option<Links>, 
+    pub id: Option<String>,
+    pub channel_id: Option<String>,
+    pub title: Option<String>,
+    pub slug: Option<String>,
+    pub description: Option<String>,
+    pub keywords: Option<Vec<String>>,
+    pub season_tags: Option<Vec<String>>,
+    pub images: Option<Images>,
+    pub maturity_ratings: Option<Vec<String>>,
+    pub episode_count: Option<u32>,
+    pub season_count: Option<u32>,
+    pub media_count: Option<u32>,
+    pub content_provide: Option<String>,
+    pub is_mature: Option<bool>,
+    pub mature_blocked: Option<bool>,
+    pub is_subbed: Option<bool>,
+    pub is_dubbed: Option<bool>,
+    pub is_simulcast: Option<bool>,
+    pub seo_title: Option<String>,
+    pub seo_description: Option<String>,
+    pub availability_notes: Option<String>,
 }
