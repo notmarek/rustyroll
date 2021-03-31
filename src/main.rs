@@ -10,8 +10,8 @@ async fn main() {
         "MWlhZ2ZsbjAycF9yY2R3amxzZ2E6MWl2dk85eVdubDUxTEd5N2VGTm5fdVdmMVluSUNGNEE=".to_string(),
         "Crunchyroll/3.5.0 Android/11 okhttp/4.8.1",
         "https://beta-api.crunchyroll.com".to_string(),
-        "***REMOVED***",
-        "***REMOVED***",
+        "**Removed**",
+        "**Removed**",
     )
     .await;
     println!("{:#?}", cr.cms);
