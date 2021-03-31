@@ -117,4 +117,27 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+    pub async fn get_video_streams(&self, media_id: &str) -> Video {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}/cms/v2{}/videos/{}/streams?Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                cms.bucket.as_ref().unwrap(),
+                media_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Video>()
+            .await
+            .unwrap()
+    }
 }

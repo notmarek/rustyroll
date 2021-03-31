@@ -91,6 +91,7 @@ pub struct Links {
 pub struct Images {
     pub poster_tall: Option<Vec<Vec<Image>>>,
     pub poster_wide: Option<Vec<Vec<Image>>>,
+    pub promo_image: Option<Vec<Vec<Image>>>,
     pub thumbnail: Option<Vec<Vec<Image>>>,
 }
 
@@ -203,4 +204,100 @@ pub struct Series {
     pub seo_title: Option<String>,
     pub seo_description: Option<String>,
     pub availability_notes: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Subtitle {
+    pub locale: Option<String>,
+    pub url: Option<String>,
+    pub format: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Subtitles {
+    #[serde(rename = "ar-ME")]
+    pub ar_me: Option<Subtitle>,
+    #[serde(rename = "de-DE")]
+    pub de_de: Option<Subtitle>,
+    #[serde(rename = "en-US")]
+    pub en_us: Option<Subtitle>,
+    #[serde(rename = "es-ES")]
+    pub es_es: Option<Subtitle>,
+    #[serde(rename = "es-LA")]
+    pub es_la: Option<Subtitle>,
+    #[serde(rename = "fr-FR")]
+    pub fr_fr: Option<Subtitle>,
+    #[serde(rename = "it-IT")]
+    pub it_it: Option<Subtitle>,
+    #[serde(rename = "pt-BR")]
+    pub pt_br: Option<Subtitle>,
+    #[serde(rename = "ru-RU")]
+    pub ru_ru: Option<Subtitle>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Stream {
+    pub hardsub_locale: Option<String>,
+    pub url: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StreamLang {
+    #[serde(rename = "")]
+    pub unsubbed: Option<Stream>,
+    #[serde(rename = "ar-ME")]
+    pub ar_me: Option<Stream>,
+    #[serde(rename = "de-DE")]
+    pub de_de: Option<Stream>,
+    #[serde(rename = "en-US")]
+    pub en_us: Option<Stream>,
+    #[serde(rename = "es-ES")]
+    pub es_es: Option<Stream>,
+    #[serde(rename = "es-LA")]
+    pub es_la: Option<Stream>,
+    #[serde(rename = "fr-FR")]
+    pub fr_fr: Option<Stream>,
+    #[serde(rename = "it-IT")]
+    pub it_it: Option<Stream>,
+    #[serde(rename = "pt-BR")]
+    pub pt_br: Option<Stream>,
+    #[serde(rename = "ru-RU")]
+    pub ru_ru: Option<Stream>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Streams {
+    pub adaptive_dash: Option<StreamLang>,
+    pub adaptive_hls: Option<StreamLang>,
+    pub download_hls: Option<StreamLang>,
+    pub drm_adaptive_dash: Option<StreamLang>,
+    pub drm_adaptive_hls: Option<StreamLang>,
+    pub drm_download_hls: Option<StreamLang>,
+    pub drm_multitrack_adaptive_hls_v2: Option<StreamLang>,
+    pub multitrack_adaptive_hls_v2: Option<StreamLang>,
+    pub urls: Option<StreamLang>,
+    pub vo_adaptive_dash: Option<StreamLang>,
+    pub vo_adaptive_hls: Option<StreamLang>,
+    pub vo_drm_adaptive_dash: Option<StreamLang>,
+    pub vo_drm_adaptive_hls: Option<StreamLang>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Video {
+    #[serde(rename = "__actions__")]
+    pub actions: Option<PlaceholderEmpty>,
+    #[serde(rename = "__class__")]
+    pub class: Option<String>,
+    #[serde(rename = "__href__")]
+    pub href: Option<String>,
+    #[serde(rename = "__resource_key__")]
+    pub resource_key: Option<String>,
+    #[serde(rename = "__links__")]
+    pub links: Option<Links>, 
+    pub media_id: Option<String>,
+    pub audio_locales: Option<String>,
+    pub subtitles: Option<Subtitles>,
+    pub captions: Option<PlaceholderEmpty>,
+    pub streams: Option<Streams>,
+    pub bifs: Option<Vec<String>>,
 }

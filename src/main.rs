@@ -15,10 +15,10 @@ async fn main() {
     )
     .await;
     println!("{:#?}", cr.cms);
-
     println!("{:#?}", cr.user);
     cr.refresh().await;
     println!("{:#?}", cr.user);
     println!("{:#?}", cr.search("slime").await);
     println!("{:#?}", cr.get_series("GRDKVP34Y").await);
+    println!("{:#?}", cr.get_video_streams("G07FNQK95").await);
 }
