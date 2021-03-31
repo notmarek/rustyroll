@@ -80,7 +80,7 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
-    pub async fn search(self, query: &str) -> Search {
+    pub async fn search(self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
         self.client
             .get(&format!("{}/content/v1/search?q={}&n=3&locale=en-US", self.base_url, query))
             .header(
@@ -90,7 +90,7 @@ impl CrunchyrollClient {
             .send()
             .await
             .unwrap()
-            .json::<Search>()
+            .json::<Wrapper<Wrapper<SearchItem>>>()
             .await
             .unwrap()
     }

@@ -123,7 +123,7 @@ pub struct SearchItem {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SearchWrapper {
+pub struct Wrapper<T> {
     #[serde(rename = "__actions__")]
     pub actions: Option<PlaceholderEmpty>,
     #[serde(rename = "__class__")]
@@ -136,24 +136,7 @@ pub struct SearchWrapper {
     pub links: Option<Links>,
     pub r#type: Option<String>,
     pub total: Option<u32>,
-    pub items: Option<Vec<SearchItem>>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Search {
-    #[serde(rename = "__actions__")]
-    pub actions: Option<PlaceholderEmpty>,
-    #[serde(rename = "__class__")]
-    pub class: Option<String>,
-    #[serde(rename = "__href__")]
-    pub href: Option<String>,
-    #[serde(rename = "__resource_key__")]
-    pub resource_key: Option<String>,
-    #[serde(rename = "__links__")]
-    pub links: Option<Links>,
-    pub r#type: Option<String>,
-    pub total: Option<u32>,
-    pub items: Option<Vec<SearchWrapper>>
+    pub items: Option<Vec<T>>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
