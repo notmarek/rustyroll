@@ -60,47 +60,36 @@ pub struct AdBreak {
     pub offset_ms: Option<u32>,
     pub r#type: Option<String>,
 }
-
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HREF {
+    pub href: Option<String>,
+}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Links {
-    #[serde(flatten)]
-    pub continuation: Option<String>,
-    #[serde(flatten)]
-    pub resource: Option<String>,
+    pub continuation: Option<HREF>,
+    pub resource: Option<HREF>,
     #[serde(rename = "resource/channel")]
-    #[serde(flatten)]
-    pub resource_channel: Option<String>,
+    pub resource_channel: Option<HREF>,
     #[serde(rename = "series/channel")]
-    #[serde(flatten)]
-    pub series_channel: Option<String>,
+    pub series_channel: Option<HREF>,
     #[serde(rename = "series/season")]
-    #[serde(flatten)]
-    pub series_season: Option<String>,
+    pub series_season: Option<HREF>,
     #[serde(rename = "episode/season")]
-    #[serde(flatten)]
-    pub episode_season: Option<String>,
+    pub episode_season: Option<HREF>,
     #[serde(rename = "episode/series")]
-    #[serde(flatten)]
-    pub episode_series: Option<String>,
+    pub episode_series: Option<HREF>,
     #[serde(rename = "episode/channel")]
-    #[serde(flatten)]
-    pub episode_channel: Option<String>,
+    pub episode_channel: Option<HREF>,
     #[serde(rename = "episode/next_episode")]
-    #[serde(flatten)]
-    pub episode_next_episode: Option<String>,
+    pub episode_next_episode: Option<HREF>,
     #[serde(rename = "season/channel")]
-    #[serde(flatten)]
-    pub season_channel: Option<String>,
+    pub season_channel: Option<HREF>,
     #[serde(rename = "season/episodes")]
-    #[serde(flatten)]
-    pub season_episodes: Option<String>,
+    pub season_episodes: Option<HREF>,
     #[serde(rename = "season/series")]
-    #[serde(flatten)]
-    pub season_series: Option<String>,
-    #[serde(flatten)]
-    pub streams: Option<String>,
-    #[serde(flatten)]
-    pub ads: Option<String>,
+    pub season_series: Option<HREF>,
+    pub streams: Option<HREF>,
+    pub ads: Option<HREF>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -239,8 +228,6 @@ pub struct Episode {
     pub subtitle_locales: Option<Vec<String>>,
     pub playback: Option<String>,
     pub availability_notes: Option<String>,
-    
-
 }
 
 #[derive(Serialize, Deserialize, Debug)]

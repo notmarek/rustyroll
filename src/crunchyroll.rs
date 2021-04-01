@@ -94,6 +94,25 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+    pub async fn get_episode(&self, episode_id: &str) -> Episode {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}/cms/v2{}/episodes/{}?Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                cms.bucket.as_ref().unwrap(),
+                episode_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .send()
+            .await
+            .unwrap()
+            .json::<Episode>()
+            .await
+            .unwrap()
+    }
     pub async fn get_episodes(&self, season_id: &str) -> Wrapper<Episode> {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
@@ -151,7 +170,7 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
-    pub async fn get_video_streams(&self, media_id: &str) -> Video {
+    pub async fn get_video_streams_by_media_id(&self, media_id: &str) -> Video {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
             .get(&format!(
@@ -159,6 +178,28 @@ impl CrunchyrollClient {
                 self.base_url,
                 cms.bucket.as_ref().unwrap(),
                 media_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Video>()
+            .await
+            .unwrap()
+    }
+    pub async fn get_video_streams_by_link(&self, link: &str) -> Video {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}{}?Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                link,
                 cms.policy.as_ref().unwrap(),
                 cms.signature.as_ref().unwrap(),
                 cms.key_pair_id.as_ref().unwrap()
