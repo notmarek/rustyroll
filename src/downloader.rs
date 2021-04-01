@@ -43,12 +43,36 @@ struct SegDownloaded {
     file: bytes::Bytes,
 }
 
+#[cfg(not(target_os = "windows"))]
+async fn remux(out: &str, segments: u32) {
+    let mut args = Vec::new();
+    for i in 1..segments {
+        args.push(format!("seg.{}.ts", i));
+    }
+    println!("Merging transport stream files.");
+    let output = Command::new("cat").args(args).output().unwrap();
+    println!("status: {}", output.status);
+    let mut file = OpenOptions::new().write(true).create(true).open("full.ts").unwrap();
+    file.write_all(&output.stdout).unwrap();
+    println!("Merge done, fixing up the transport stream with ffmpeg.");
+    Command::new("ffmpeg")
+        .arg("-i")
+        .arg("full.ts")
+        .arg("-c")
+        .arg("copy")
+        .arg("full.final.ts")
+        .output()
+        .unwrap();
+    println!("Fixing done, multiplexing resources into Matroska.");
+    Command::new("mkvmerge").arg("@options.json").arg("--output").arg(out).output().unwrap();
+    println!("Finished your file is ready!")
+}
+
+#[cfg(target_os = "windows")]
 async fn remux(out: &str, segments: u32) {
     let mut segment_string = "seg.1.ts".to_string();
-    let mut i = 2;
-    while i <= segments {
+    for i in 2..segments {
         segment_string = format!("{}+seg.{}.ts", segment_string, i);
-        i += 1;
     }
     println!("Merging transport stream files.");
     Command::new("cmd")
