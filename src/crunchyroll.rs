@@ -23,6 +23,10 @@ impl CrunchyrollClient {
             cms: None,
         };
         future_self.load_user(username, password).await;
+        if future_self.user.as_ref().unwrap().access_token.is_none() {
+            println!("Login failed trying anonymous login.");
+            future_self.anonymous_login().await;
+        }
         future_self.load_cms_info().await;
         future_self
     }
@@ -63,6 +67,24 @@ impl CrunchyrollClient {
                 .await
                 .unwrap(),
         );
+        
+    }
+    async fn anonymous_login(&mut self) {
+        let mut params = HashMap::new();
+        params.insert("grant_type", "client_id");
+        self.user = Some(
+            self.client
+                .post(&format!("{}/auth/v1/token", self.base_url))
+                .header("Authorization", &format!("Basic {}", self.api_key))
+                .form(&params)
+                .send()
+                .await
+                .unwrap()
+                .json::<User>()
+                .await
+                .unwrap(),
+        );
+        
     }
     async fn load_cms_info(&mut self) {
         self.cms = Some(
