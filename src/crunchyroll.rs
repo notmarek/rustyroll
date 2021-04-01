@@ -82,7 +82,7 @@ impl CrunchyrollClient {
     }
     pub async fn search(&self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
         self.client
-            .get(&format!("{}/content/v1/search?q={}&locale=en-US", self.base_url, query))
+            .get(&format!("{}/content/v1/search?q={}&type=series&locale=en-US", self.base_url, query))
             .header(
                 "Authorization",
                 &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
@@ -91,6 +91,25 @@ impl CrunchyrollClient {
             .await
             .unwrap()
             .json::<Wrapper<Wrapper<SearchItem>>>()
+            .await
+            .unwrap()
+    }
+    pub async fn get_seasons(&self, series_id: &str) -> Wrapper<Season> {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}/cms/v2{}/seasons?series_id={}&Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                cms.bucket.as_ref().unwrap(),
+                series_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .send()
+            .await
+            .unwrap()
+            .json::<Wrapper<Season>>()
             .await
             .unwrap()
     }
@@ -106,10 +125,6 @@ impl CrunchyrollClient {
                 cms.signature.as_ref().unwrap(),
                 cms.key_pair_id.as_ref().unwrap()
             ))
-            .header(
-                "Authorization",
-                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
-            )
             .send()
             .await
             .unwrap()

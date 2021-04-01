@@ -82,6 +82,15 @@ pub struct Links {
     #[serde(rename = "episode/series")]
     #[serde(flatten)]
     pub episode_series: Option<String>,
+    #[serde(rename = "season/channel")]
+    #[serde(flatten)]
+    pub season_channel: Option<String>,
+    #[serde(rename = "season/episodes")]
+    #[serde(flatten)]
+    pub season_episodes: Option<String>,
+    #[serde(rename = "season/series")]
+    #[serde(flatten)]
+    pub season_series: Option<String>,
     #[serde(flatten)]
     pub streams: Option<String>,
   
@@ -144,6 +153,40 @@ pub struct Wrapper<T> {
     pub r#type: Option<String>,
     pub total: Option<u32>,
     pub items: Option<Vec<T>>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Season {
+    #[serde(rename = "__actions__")]
+    pub actions: Option<PlaceholderEmpty>,
+    #[serde(rename = "__class__")]
+    pub class: Option<String>,
+    #[serde(rename = "__href__")]
+    pub href: Option<String>,
+    #[serde(rename = "__resource_key__")]
+    pub resource_key: Option<String>,
+    #[serde(rename = "__links__")]
+    pub links: Option<Links>,
+    pub id: Option<String>,
+    pub channel_id: Option<String>,
+    pub title: Option<String>,
+    pub series_id: Option<String>,
+    pub season_number: Option<u32>,
+    pub is_complete: Option<bool>,
+    pub description: Option<String>,
+    pub keywords: Option<Vec<String>>,
+    pub season_tags: Option<Vec<String>>,
+    pub images: Option<Images>,
+    pub is_mature: Option<bool>,
+    pub mature_blocked: Option<bool>,
+    pub is_subbed: Option<bool>,
+    pub is_dubbed: Option<bool>,
+    pub is_simulcast: Option<bool>,
+    pub seo_title: Option<String>,
+    pub seo_description: Option<String>,
+    pub availability_notes: Option<String>,
+
+
 }
 
 #[derive(Serialize, Deserialize, Debug)]
