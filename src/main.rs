@@ -2,7 +2,10 @@
 // My user agent "Crunchyroll/3.5.0 Android/11 okhttp/4.8.1"
 mod crunchyroll;
 mod models;
+mod downloader;
 use crunchyroll::CrunchyrollClient;
+use models::*;
+use downloader::download;
 
 #[tokio::main]
 async fn main() {
@@ -15,10 +18,13 @@ async fn main() {
     )
     .await;
     println!("{:#?}", cr.cms);
-    println!("{:#?}", cr.user);
-    cr.refresh().await;
-    println!("{:#?}", cr.user);
-    println!("{:#?}", cr.search("slime").await);
-    println!("{:#?}", cr.get_series("GRDKVP34Y").await);
-    println!("{:#?}", cr.get_video_streams("G07FNQK95").await);
+    // println!("{:#?}", cr.user);
+    // cr.refresh().await;
+    // println!("{:#?}", cr.user);
+    // println!("{:#?}", cr.search("slime").await);
+    // println!("{:#?}", cr.get_series("GRDKVP34Y").await);
+    let streams: Video = cr.get_video_streams("G07FNQK95").await;
+    let subs: String = streams.subtitles.unwrap().en_us.unwrap().url.unwrap();
+    let video: String = streams.streams.unwrap().vo_adaptive_hls.unwrap().unsubbed.unwrap().url.unwrap();
+    download(&video, &subs, "1920x1080".to_string(), "Test.mkv", 15).await;
 }

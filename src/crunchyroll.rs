@@ -82,7 +82,7 @@ impl CrunchyrollClient {
     }
     pub async fn search(&self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
         self.client
-            .get(&format!("{}/content/v1/search?q={}&n=3&locale=en-US", self.base_url, query))
+            .get(&format!("{}/content/v1/search?q={}&locale=en-US", self.base_url, query))
             .header(
                 "Authorization",
                 &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
