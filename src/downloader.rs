@@ -64,7 +64,7 @@ async fn remux(out: &str, segments: u32) {
         .output()
         .unwrap();
     println!("Fixing done, multiplexing resources into Matroska.");
-    Command::new("mkvmerge").arg("@options.json").arg("--output").arg(out).output().unwrap();
+    Command::new("mkvmerge").arg("@options.unix.json").arg("-o").arg(out).output().unwrap();
     println!("Finished your file is ready!")
 }
 
