@@ -56,7 +56,7 @@ pub struct SearchMetadata {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-    pub struct AdBreak {
+pub struct AdBreak {
     pub offset_ms: Option<u32>,
     pub r#type: Option<String>,
 }
@@ -64,7 +64,7 @@ pub struct SearchMetadata {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Links {
     #[serde(flatten)]
-    pub continuation: Option<String>,  
+    pub continuation: Option<String>,
     #[serde(flatten)]
     pub resource: Option<String>,
     #[serde(rename = "resource/channel")]
@@ -82,6 +82,12 @@ pub struct Links {
     #[serde(rename = "episode/series")]
     #[serde(flatten)]
     pub episode_series: Option<String>,
+    #[serde(rename = "episode/channel")]
+    #[serde(flatten)]
+    pub episode_channel: Option<String>,
+    #[serde(rename = "episode/next_episode")]
+    #[serde(flatten)]
+    pub episode_next_episode: Option<String>,
     #[serde(rename = "season/channel")]
     #[serde(flatten)]
     pub season_channel: Option<String>,
@@ -93,7 +99,8 @@ pub struct Links {
     pub season_series: Option<String>,
     #[serde(flatten)]
     pub streams: Option<String>,
-  
+    #[serde(flatten)]
+    pub ads: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -105,9 +112,7 @@ pub struct Images {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PlaceholderEmpty {
-
-}
+pub struct PlaceholderEmpty {}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SearchItem {
@@ -152,7 +157,7 @@ pub struct Wrapper<T> {
     pub links: Option<Links>,
     pub r#type: Option<String>,
     pub total: Option<u32>,
-    pub items: Option<Vec<T>>
+    pub items: Option<Vec<T>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -185,7 +190,56 @@ pub struct Season {
     pub seo_title: Option<String>,
     pub seo_description: Option<String>,
     pub availability_notes: Option<String>,
+}
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Episode {
+    #[serde(rename = "__actions__")]
+    pub actions: Option<PlaceholderEmpty>,
+    #[serde(rename = "__class__")]
+    pub class: Option<String>,
+    #[serde(rename = "__href__")]
+    pub href: Option<String>,
+    #[serde(rename = "__resource_key__")]
+    pub resource_key: Option<String>,
+    #[serde(rename = "__links__")]
+    pub links: Option<Links>,
+    pub id: Option<String>,
+    pub channel_id: Option<String>,
+    pub title: Option<String>,
+    pub series_id: Option<String>,
+    pub season_number: Option<u32>,
+    pub season_title: Option<String>,
+    pub series_title: Option<String>,
+    pub episode: Option<String>,
+    pub episode_number: Option<u32>,
+    pub sequence_number: Option<u32>,
+    pub production_episode_id: Option<String>,
+    pub description: Option<String>,
+    pub next_episode_id: Option<String>,
+    pub next_episode_title: Option<String>,
+    pub hd_flag: Option<bool>,
+    pub is_mature: Option<bool>,
+    pub mature_blocked: Option<bool>,
+    pub episode_air_date: Option<String>,
+    pub is_subbed: Option<bool>,
+    pub is_dubbed: Option<bool>,
+    pub is_clip: Option<bool>,
+    pub seo_title: Option<String>,
+    pub seo_description: Option<String>,
+    pub season_tags: Option<Vec<String>>,
+    pub available_offline: Option<bool>,
+    pub media_type: Option<String>,
+    pub slug: Option<String>,
+    pub images: Option<Images>,
+    pub duration_ms: Option<u64>,
+    pub ad_breaks: Option<Vec<AdBreak>>,
+    pub is_premium_only: Option<bool>,
+    pub listing_id: Option<String>,
+    pub subtitle_locales: Option<Vec<String>>,
+    pub playback: Option<String>,
+    pub availability_notes: Option<String>,
+    
 
 }
 
@@ -225,7 +279,7 @@ pub struct Series {
     #[serde(rename = "__resource_key__")]
     pub resource_key: Option<String>,
     #[serde(rename = "__links__")]
-    pub links: Option<Links>, 
+    pub links: Option<Links>,
     pub id: Option<String>,
     pub channel_id: Option<String>,
     pub title: Option<String>,
@@ -336,7 +390,7 @@ pub struct Video {
     #[serde(rename = "__resource_key__")]
     pub resource_key: Option<String>,
     #[serde(rename = "__links__")]
-    pub links: Option<Links>, 
+    pub links: Option<Links>,
     pub media_id: Option<String>,
     pub audio_locales: Option<String>,
     pub subtitles: Option<Subtitles>,

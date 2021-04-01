@@ -94,6 +94,25 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+    pub async fn get_episodes(&self, season_id: &str) -> Wrapper<Episode> {
+        let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
+        self.client
+            .get(&format!(
+                "{}/cms/v2{}/episodes?season_id={}&Policy={}&Signature={}&Key-Pair-Id={}&locale=en-US",
+                self.base_url,
+                cms.bucket.as_ref().unwrap(),
+                season_id,
+                cms.policy.as_ref().unwrap(),
+                cms.signature.as_ref().unwrap(),
+                cms.key_pair_id.as_ref().unwrap()
+            ))
+            .send()
+            .await
+            .unwrap()
+            .json::<Wrapper<Episode>>()
+            .await
+            .unwrap()
+    }
     pub async fn get_seasons(&self, series_id: &str) -> Wrapper<Season> {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
