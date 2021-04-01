@@ -6,15 +6,26 @@ mod downloader;
 use crunchyroll::CrunchyrollClient;
 use models::*;
 use downloader::download;
+use std::env;
 
 #[tokio::main]
 async fn main() {
+    let mut email;
+    let mut password;
+    match env::var("CR_EMAIL") {
+        Ok(val) => email = val,
+        Err(_e) => email = "none".to_string(),
+    }
+    match env::var("CR_PASS") {
+        Ok(val) => password = val,
+        Err(_e) => password = "none".to_string(),
+    }
     let mut cr = CrunchyrollClient::setup(
         "MWlhZ2ZsbjAycF9yY2R3amxzZ2E6MWl2dk85eVdubDUxTEd5N2VGTm5fdVdmMVluSUNGNEE=".to_string(),
         "Crunchyroll/3.5.0 Android/11 okhttp/4.8.1",
         "https://beta-api.crunchyroll.com".to_string(),
-        "**Removed**",
-        "**Removed**",
+        &email,
+        &password,
     )
     .await;
     println!("{:#?}", cr.cms);
@@ -32,5 +43,6 @@ async fn main() {
     // println!("{:#?}", streams);
     let subs: String = streams.subtitles.unwrap().en_us.unwrap().url.unwrap();
     let video: String = streams.streams.unwrap().vo_adaptive_hls.unwrap().unsubbed.unwrap().url.unwrap();
+    println!("{:#?}", video);
     download(&video, &subs, "1920x1080".to_string(), "Test.mkv", 15).await;
 }
