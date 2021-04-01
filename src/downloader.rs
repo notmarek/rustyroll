@@ -1,4 +1,3 @@
-use std::process::Command;
 use futures::{stream, StreamExt};
 use libaes::Cipher;
 use m3u8_rs::playlist::Playlist;
@@ -6,9 +5,10 @@ use m3u8_rs::playlist::{MasterPlaylist, MediaPlaylist};
 use std::convert::TryInto;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
-use tokio::sync::Mutex;
 use std::io::{self};
+use std::process::Command;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 async fn parse_master(hls_uri: &str) -> Option<MasterPlaylist> {
     let hls: String = reqwest::get(hls_uri).await.unwrap().text().await.unwrap();
@@ -69,6 +69,14 @@ async fn remux(out: &str, segments: u32) {
 }
 
 #[cfg(target_os = "windows")]
+async fn cleanup() {
+    Command::new("cmd").args(vec!["/C", "del", "/f", "*.ts", "en-us.ass"]).output().unwrap();
+}
+#[cfg(not(target_os = "windows"))]
+async fn cleanup() {
+    Command::new("rm").args(vec!["-rf", "*.ts", "en-us.ass"]).output().unwrap();
+}
+#[cfg(target_os = "windows")]
 async fn remux(out: &str, segments: u32) {
     let mut segment_string = "seg.1.ts".to_string();
     for i in 2..segments {
@@ -125,7 +133,6 @@ async fn generate_subs(sub_url: String) {
 }
 
 pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file_name: &str, download_thread: usize) {
-
     for x in parse_master(hls_uri).await.unwrap().variants {
         if x.resolution.unwrap_or(String::new()) == quality {
             let segments = &parse_playlist(&x.uri).await.unwrap();
@@ -178,7 +185,6 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
                                 .unwrap();
                             file.write_all(decrypted).unwrap();
                             *lock += 1;
-
                         }
                         Err(e) => eprintln!("Got a tokio::JoinError: {}", e),
                     }
@@ -187,6 +193,7 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
             println!("Video download done!");
             generate_subs(sub_uri.to_string()).await;
             remux(output_file_name, segments.segments.len() as u32).await;
+            cleanup().await; // cleanup the leftover files
         }
     }
 }
