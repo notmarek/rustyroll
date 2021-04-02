@@ -30,11 +30,13 @@ impl CrunchyrollClient {
         future_self.load_cms_info().await;
         future_self
     }
+
     pub async fn close(&mut self) {
         self.revoke_refresh_token().await;
         self.user = None;
         self.cms = None;
     }
+
     pub async fn refresh(&mut self) {
         let mut params = HashMap::new();
         params.insert("refresh_token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap().as_str());
@@ -53,6 +55,7 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
+
     async fn revoke_refresh_token(&self) {
         let mut params = HashMap::new();
         params.insert("token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap());
@@ -64,6 +67,7 @@ impl CrunchyrollClient {
             .await
             .unwrap();
     }
+
     async fn load_user(&mut self, username: &str, password: &str) {
         let mut params = HashMap::new();
         params.insert("username", username);
@@ -83,6 +87,7 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
+
     async fn anonymous_login(&mut self) {
         let mut params = HashMap::new();
         params.insert("grant_type", "client_id");
@@ -99,6 +104,7 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
+
     async fn load_cms_info(&mut self) {
         self.cms = Some(
             self.client
@@ -129,6 +135,7 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+
     pub async fn get_episode(&self, episode_id: &str) -> Episode {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
@@ -148,6 +155,7 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+
     pub async fn get_episodes(&self, season_id: &str) -> Wrapper<Episode> {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
@@ -167,6 +175,7 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+
     pub async fn get_seasons(&self, series_id: &str) -> Wrapper<Season> {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client
@@ -186,6 +195,7 @@ impl CrunchyrollClient {
             .await
             .unwrap()
     }
+
     pub async fn get_series(&self, series_id: &str) -> Series {
         let cms = self.cms.as_ref().unwrap().cms.as_ref().unwrap();
         self.client

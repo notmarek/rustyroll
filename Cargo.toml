@@ -1,6 +1,6 @@
 [package]
-name = "crunchpls"
-version = "0.1.0"
+name = "rustyroll"
+version = "0.1.4"
 authors = ["Marek Veselý <veselym@spstrutnov.cz>"]
 edition = "2018"
 
@@ -14,3 +14,7 @@ m3u8-rs = "1.0"
 libaes = "0.6.1"
 futures = "0.3"
 bytes = "1.0.1"
+
+[[example]]
+name = "batch_download"
+path = "examples/batch_download.rs"

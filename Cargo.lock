@@ -67,19 +67,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea221b5284a47e40033bf9b66f35f984ec0ea2931eb03505246cd27a963f981b"
 
 [[package]]
-name = "crunchpls"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "libaes",
- "m3u8-rs",
- "reqwest",
- "serde",
- "tokio",
-]
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -759,6 +746,19 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "winreg",
+]
+
+[[package]]
+name = "rustyroll"
+version = "0.1.4"
+dependencies = [
+ "bytes",
+ "futures",
+ "libaes",
+ "m3u8-rs",
+ "reqwest",
+ "serde",
+ "tokio",
 ]
 
 [[package]]
