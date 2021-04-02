@@ -41,6 +41,7 @@ fn pop(bytes: &[u8]) -> &[u8; 16] {
 struct SegDownloaded {
     part_number: u32,
     file: bytes::Bytes,
+    uri: String,
 }
 
 #[cfg(not(target_os = "windows"))]
@@ -156,10 +157,11 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
                     let client = client.clone();
                     i += 1;
                     tokio::spawn(async move {
-                        let resp = client.get(url).send().await.unwrap();
+                        let resp = client.get(&url).send().await.unwrap();
                         SegDownloaded {
                             file: resp.bytes().await.unwrap(),
                             part_number: i.clone(),
+                            uri: url.clone().to_string(),
                         }
                     })
                 })
@@ -176,7 +178,16 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
                             io::stdout().flush().unwrap();
                             // println!("Downloaded segment #{}", segment.part_number);
                             // println!("Segment #{} - {} bytes", segment.part_number, segment.file.len());
-                            let decrypted: &[u8] = &cipher.cbc_decrypt(iv, &segment.file[..])[..];
+                            let mut data = segment.file;
+                            while &data[..].len() < &128 {
+                                println!(
+                                    "\nSeems like segment #{} is corrupted, its only {} bytes long! Trying to redownload it.",
+                                    &segment.part_number,
+                                    &data[..].len()
+                                );
+                                data = client.get(&segment.uri).send().await.unwrap().bytes().await.unwrap();
+                            }
+                            let decrypted: &[u8] = &cipher.cbc_decrypt(iv, &data[..])[..];
                             let mut file = OpenOptions::new()
                                 .read(true)
                                 .write(true)
