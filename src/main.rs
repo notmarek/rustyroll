@@ -28,21 +28,23 @@ async fn main() {
         &password,
     )
     .await;
-    println!("{:#?}", cr.cms);
+    // println!("{:#?}", cr.cms);
     // println!("{:#?}", cr.user);
     // cr.refresh().await;
     // println!("{:#?}", cr.user);
     // println!("{:#?}", cr.search("slime").await);
     // println!("{:#?}", cr.get_seasons("G6P5MMXV6").await);
     //GR24GGE06
-    let episode_id = cr.get_episodes("GR24GGE06").await.items.as_ref().unwrap()[1].id.as_ref().unwrap().clone();
-    let episode = cr.get_episode(&episode_id).await;
-    // println!("{:#?}", &episode_id);
-    let media_link = episode.links.unwrap().streams.unwrap().href.unwrap();
-    let streams: Video = cr.get_video_streams_by_link(&media_link).await;
-    // println!("{:#?}", streams);
-    let subs: String = streams.subtitles.unwrap().en_us.unwrap().url.unwrap();
-    let video: String = streams.streams.unwrap().vo_adaptive_hls.unwrap().unsubbed.unwrap().url.unwrap();
-    println!("{:#?}", video);
-    download(&video, &subs, "1920x1080".to_string(), "Test.mkv", 15).await;
+    let episodes: Wrapper<Episode> = cr.get_episodes("GR24GGE06").await;
+    // println!("{:#?}", episodes);
+    for x in 0..episodes.items.as_ref().unwrap().len() {
+        let episode_id: String = episodes.items.as_ref().unwrap()[x].id.as_ref().unwrap().clone();
+        let episode: Episode = cr.get_episode(&episode_id).await;
+        let media_link: String = episode.links.unwrap().streams.unwrap().href.unwrap();
+        let streams: Video = cr.get_video_streams_by_link(&media_link).await;
+        let subs: String = streams.subtitles.unwrap().en_us.unwrap().url.unwrap();
+        let video: String = streams.streams.unwrap().vo_adaptive_hls.unwrap().unsubbed.unwrap().url.unwrap();
+        println!("{:#?}", video);
+        download(&video, &subs, "1920x1080".to_string(), &format!("[Rustyroll] {title} #{episode} (1080p).mkv", title=episode.series_title.unwrap(), episode=episode.episode.unwrap()), 15).await;
+    }
 }
