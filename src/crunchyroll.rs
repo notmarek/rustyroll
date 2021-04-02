@@ -30,7 +30,11 @@ impl CrunchyrollClient {
         future_self.load_cms_info().await;
         future_self
     }
-
+    pub async fn close(&mut self) {
+        self.revoke_refresh_token().await;
+        self.user = None;
+        self.cms = None;
+    }
     pub async fn refresh(&mut self) {
         let mut params = HashMap::new();
         params.insert("refresh_token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap().as_str());
@@ -48,6 +52,17 @@ impl CrunchyrollClient {
                 .await
                 .unwrap(),
         );
+    }
+    async fn revoke_refresh_token(&self) {
+        let mut params = HashMap::new();
+        params.insert("token", self.user.as_ref().unwrap().refresh_token.as_ref().unwrap());
+        self.client
+            .post(&format!("{}/auth/v1/revoke", self.base_url))
+            .header("Authorization", &format!("Basic {}", self.api_key))
+            .form(&params)
+            .send()
+            .await
+            .unwrap();
     }
     async fn load_user(&mut self, username: &str, password: &str) {
         let mut params = HashMap::new();
@@ -67,7 +82,6 @@ impl CrunchyrollClient {
                 .await
                 .unwrap(),
         );
-        
     }
     async fn anonymous_login(&mut self) {
         let mut params = HashMap::new();
@@ -84,7 +98,6 @@ impl CrunchyrollClient {
                 .await
                 .unwrap(),
         );
-        
     }
     async fn load_cms_info(&mut self) {
         self.cms = Some(

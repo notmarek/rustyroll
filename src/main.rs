@@ -47,4 +47,5 @@ async fn main() {
         println!("{:#?}", video);
         download(&video, &subs, "1920x1080".to_string(), &format!("[Rustyroll] {title} #{episode} (1080p).mkv", title=episode.series_title.unwrap(), episode=episode.episode.unwrap()), 15).await;
     }
+    cr.close().await; // revokes the refresh token and cleans out user and cms info
 }
