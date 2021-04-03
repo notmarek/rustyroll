@@ -24,9 +24,26 @@ impl CrunchyrollClient {
         };
         future_self.load_user(username, password).await;
         if future_self.user.as_ref().unwrap().access_token.is_none() {
-            println!("Login failed trying anonymous login.");
-            future_self.anonymous_login().await;
+            future_self.user = None;
+        } else {
+            future_self.load_cms_info().await;
         }
+        future_self
+    }
+
+    pub async fn setup_anon(api_key: String, ua: &str, base_url: String) {
+        let mut headers = header::HeaderMap::new();
+        headers.insert(header::USER_AGENT, header::HeaderValue::from_str(ua).unwrap());
+        let client = reqwest::Client::builder().default_headers(headers).build().unwrap();
+        let mut future_self = CrunchyrollClient {
+            api_key: api_key,
+            base_url: base_url,
+            user: None,
+            client: client,
+            cms: None,
+        };
+        println!("Login failed trying anonymous login.");
+        future_self.anonymous_login().await;
         future_self.load_cms_info().await;
         future_self
     }
