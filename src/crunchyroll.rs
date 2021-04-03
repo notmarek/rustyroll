@@ -31,7 +31,7 @@ impl CrunchyrollClient {
         future_self
     }
 
-    pub async fn setup_anon(api_key: String, ua: &str, base_url: String) {
+    pub async fn setup_anon(api_key: String, ua: &str, base_url: String) -> CrunchyrollClient {
         let mut headers = header::HeaderMap::new();
         headers.insert(header::USER_AGENT, header::HeaderValue::from_str(ua).unwrap());
         let client = reqwest::Client::builder().default_headers(headers).build().unwrap();
