@@ -121,6 +121,38 @@ impl CrunchyrollClient {
                 .unwrap(),
         );
     }
+    pub async fn get_me(&self) -> Me {
+        self.client
+            .get(&format!("{}/accounts/v1/me", self.base_url))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Me>()
+            .await
+            .unwrap()
+    }
+    pub async fn get_user_benefits(&self) -> Wrapper<Benefit> {
+        self.client
+            .get(&format!(
+                "{}/subs/v1/subscriptions/{}/benefits",
+                self.base_url,
+                self.get_me().await.external_id.unwrap()
+            ))
+            .header(
+                "Authorization",
+                &format!("Bearer {}", self.user.as_ref().unwrap().access_token.as_ref().unwrap()),
+            )
+            .send()
+            .await
+            .unwrap()
+            .json::<Wrapper<Benefit>>()
+            .await
+            .unwrap()
+    }
     pub async fn search(&self, query: &str) -> Wrapper<Wrapper<SearchItem>> {
         self.client
             .get(&format!("{}/content/v1/search?q={}&type=series&locale=en-US", self.base_url, query))

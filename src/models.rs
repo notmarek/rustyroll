@@ -26,6 +26,28 @@ pub struct SeriesMetadata {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Me {
+    pub account_id: Option<String>,
+    pub external_id: Option<String>,
+    pub email_verified: Option<bool>,
+    pub created: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Benefit {
+    #[serde(rename = "__actions__")]
+    pub actions: Option<PlaceholderEmpty>,
+    #[serde(rename = "__class__")]
+    pub class: Option<String>,
+    #[serde(rename = "__href__")]
+    pub href: Option<String>,
+    #[serde(rename = "__links__")]
+    pub links: Option<Links>,
+    pub benefit: Option<String>,
+    pub source: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct EpisodeMetadata {
     pub ad_breaks: Option<Vec<AdBreak>>,
     pub availability_notes: Option<String>,
