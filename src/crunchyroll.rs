@@ -31,6 +31,26 @@ impl CrunchyrollClient {
         future_self
     }
 
+    pub async fn setup_with_proxy(api_key: String, ua: &str, base_url: String, username: &str, password: &str, proxy: reqwest::Proxy) -> CrunchyrollClient {
+        let mut headers = header::HeaderMap::new();
+        headers.insert(header::USER_AGENT, header::HeaderValue::from_str(ua).unwrap());
+        let client = reqwest::Client::builder().default_headers(headers).proxy(proxy).build().unwrap();
+        let mut future_self = CrunchyrollClient {
+            api_key: api_key,
+            base_url: base_url,
+            user: None,
+            client: client,
+            cms: None,
+        };
+        future_self.load_user(username, password).await;
+        if future_self.user.as_ref().unwrap().access_token.is_none() {
+            future_self.user = None;
+        } else {
+            future_self.load_cms_info().await;
+        }
+        future_self
+    }
+
     pub async fn setup_anon(api_key: String, ua: &str, base_url: String) -> CrunchyrollClient {
         let mut headers = header::HeaderMap::new();
         headers.insert(header::USER_AGENT, header::HeaderValue::from_str(ua).unwrap());
