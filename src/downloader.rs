@@ -39,7 +39,7 @@ fn pop(bytes: &[u8]) -> &[u8; 16] {
 }
 
 struct SegDownloaded {
-    part_number: u32,
+    part_number: u128,
     file: bytes::Bytes,
     uri: String,
 }
@@ -144,7 +144,7 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
             let key_uri = &segment.key.as_ref().unwrap().uri.as_ref().unwrap();
             let r = reqwest::get(&key_uri.to_string()).await.unwrap().bytes().await.unwrap();
             let key: &[u8; 16] = pop(&r[..16]);
-            let iv = b"0000000000000000";
+            // let iv = b"0000000000000000";
             let cipher = Cipher::new_128(key);
             println!("Segments: {}", &segments.segments.len());
             for segment in &segments.segments[1..] {
@@ -187,6 +187,7 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
                                 );
                                 data = client.get(&segment.uri).send().await.unwrap().bytes().await.unwrap();
                             }
+                            let iv = &segment.part_number.to_be_bytes();
                             let decrypted: &[u8] = &cipher.cbc_decrypt(iv, &data[..])[..];
                             let mut file = OpenOptions::new()
                                 .read(true)
