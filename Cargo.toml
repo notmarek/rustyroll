@@ -18,3 +18,7 @@ bytes = "1.0.1"
 [[example]]
 name = "batch_download"
 path = "examples/batch_download.rs"
+
+[[example]]
+name = "us_login"
+path = "examples/us_login.rs"
