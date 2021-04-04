@@ -36,7 +36,7 @@ async fn main() {
             &subs,
             "1920x1080".to_string(),
             &format!(
-                "[Rustyroll] {title} #{episode} (1080p).mkv",
+                "[Rustyroll] {title} #{episode} (1080p)",
                 title = episode.series_title.unwrap(),
                 episode = episode.episode.unwrap()
             ),

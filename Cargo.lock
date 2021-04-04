@@ -758,6 +758,7 @@ dependencies = [
  "m3u8-rs",
  "reqwest",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
