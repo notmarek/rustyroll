@@ -1,15 +1,15 @@
 use futures::{stream, StreamExt};
 use libaes::Cipher;
-use m3u8_rs::playlist::{Playlist, MasterPlaylist, MediaPlaylist};
+use m3u8_rs::playlist::{MasterPlaylist, MediaPlaylist, Playlist};
+use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
-use std::fs::{create_dir_all, remove_dir_all, OpenOptions};
+use std::fs::{create_dir_all, remove_dir_all, remove_file, OpenOptions};
 use std::io::prelude::*;
 use std::io::{self};
+use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
-use std::path::Path;
 use tokio::sync::Mutex;
-use serde::{Deserialize, Serialize};
 
 struct SegDownloaded {
     part_number: u128,
@@ -56,71 +56,118 @@ async fn cleanup(out: &str) {
     remove_dir_all(format!("Downloads/{}", out)).unwrap();
 }
 
-#[cfg(not(target_os = "windows"))]
 async fn remux(out: &str, segments: u32) {
-    let mut args = Vec::new();
-    for i in 1..segments {
-        args.push(format!("seg.{}.ts", i));
+    let mut segment_string = format!("seg.1.ts");
+    for i in 2..segments {
+        segment_string = format!("{}+seg.{}.ts", segment_string, i);
     }
     println!("Merging transport stream files.");
-    let output = Command::new("cat").args(args).output().unwrap();
-    println!("status: {}", output.status);
-    let mut file = OpenOptions::new().write(true).create(true).open("full.ts").unwrap();
-    file.write_all(&output.stdout).unwrap();
-    println!("Merge done, fixing up the transport stream with ffmpeg.");
-    Command::new("ffmpeg")
-        .arg("-i")
-        .arg(&format!("{}/full.ts", out))
-        .arg("-c")
-        .arg("copy")
-        .arg(&format!("{}/full.final.ts", out))
-        .output()
-        .unwrap();
-    println!("Fixing done, multiplexing resources into Matroska.");
-    Command::new("mkvmerge")
-        .arg("@options.unix.json")
-        .arg("-o")
-        .arg(&format!("{}.mkv", out))
+    merge(out, segments).await;
+    // println!("Fixing up the transport stream with ffmpeg.");
+    // Command::new("ffmpeg")
+    //     .arg("-i")
+    //     .arg(&format!("{}/full.ts", out))
+    //     .arg("-c")
+    //     .arg("copy")
+    //     .arg(&format!("{}/full.final.ts", out))
+    //     .output()
+    //     .unwrap();
+    println!("Multiplexing resources into Matroska.");
+    Command::new("mkvmerge.exe")
+        .args(vec![
+            "--language",
+            "0:und",
+            "--language",
+            "1:ja",
+            "(",
+            &format!("{}/full.ts", out),
+            ")",
+            "--language",
+            "0:en",
+            "--track-name",
+            "0:ENG Subs",
+            "(",
+            &format!("{}/en-us.ass", out),
+            ")",
+            "--attachment-name",
+            "Lato-Medium.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/Lato-Medium.ttf",
+            "--attachment-name",
+            "Lato-MediumItalic.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/Lato-MediumItalic.ttf",
+            "--attachment-name",
+            "times.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/times.ttf",
+            "--attachment-name",
+            "trebuc.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/trebuc.ttf",
+            "--attachment-name",
+            "arial.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/arial.ttf",
+            "--attachment-name",
+            "comic.ttf",
+            "--attachment-mime-type",
+            "application/x-truetype-font",
+            "--attach-file",
+            "fonts/comic.ttf",
+            "--track-order",
+            "0:0,0:1,1:0",
+            "--output",
+            &format!("{}.mkv", out),
+        ])
         .output()
         .unwrap();
     println!("Finished your file is ready!")
 }
 
 #[cfg(target_os = "windows")]
-async fn remux(out: &str, segments: u32) {
-    let mut segment_string = format!("{}/seg.1.ts", out);
-    for i in 2..segments {
-        segment_string = format!("{}+{}/seg.{}.ts", segment_string, out, i);
+async fn merge(out: &str, segments: u32) {
+    let mut full = OpenOptions::new()
+        .append(true)
+        .write(true)
+        .create(true)
+        .open(format!("{}/full.ts", out))
+        .unwrap();
+    for segment in 1..segments {
+        let mut file = OpenOptions::new().read(true).open(format!("{}/seg.{}.ts", out, segment)).unwrap();
+        let mut data: Vec<u8> = Vec::new();
+        file.read_to_end(&mut data).unwrap();
+        full.write_all(&data[..]).unwrap();
+        print!("\rMerging {}%", (segment / segments) * 100);
+        io::stdout().flush().unwrap();
     }
-    println!("Merging transport stream files.");
-    Command::new("cmd")
-        .arg("/C")
-        .arg("copy")
-        .arg("/b")
-        .arg(segment_string)
-        .arg(&format!("{}/full.ts", out))
-        .output()
-        .unwrap();
-    println!("Merge done, fixing up the transport stream with ffmpeg.");
-    Command::new("ffmpeg")
-        .arg("-i")
-        .arg(&format!("{}/full.ts", out))
-        .arg("-c")
-        .arg("copy")
-        .arg(&format!("{}/full.final.ts", out))
-        .output()
-        .unwrap();
-    println!("Fixing done, multiplexing resources into Matroska.");
-    Command::new("mkvmerge.exe")
-        .arg("@options.json")
-        .arg("--output")
-        .arg(&format!("{}.mkv", out))
-        .output()
-        .unwrap();
-    println!("Finished your file is ready!")
+    print!("\rMerging done.\n");
+}
+
+#[cfg(not(target_os = "windows"))]
+async fn merge(out: &str, segments: u32) {
+    let mut args = Vec::new();
+    for i in 1..segments {
+        args.push(format!("{}/seg.{}.ts", out, i));
+    }
+    let output = Command::new("cat").args(args).output().unwrap();
+    let mut file = OpenOptions::new().write(true).create(true).open(format!("{}/full.ts", out)).unwrap();
+    file.write_all(&output.stdout).unwrap();
+    println!("Merging done.")
 }
 
 async fn generate_subs(sub_url: String, output_file_name: &str) {
+    remove_file(format!("Downloads/{}/en-us.ass", output_file_name)).unwrap_or(());
     println!("Generating modified sub file.");
     let mut header_file = OpenOptions::new().read(true).open("subtitle_header_mod.ass").unwrap();
     let mut header: String = String::new();
@@ -149,10 +196,10 @@ async fn generate_subs(sub_url: String, output_file_name: &str) {
 
 async fn save_state(resume: &Resume, out: &str) {
     let mut file = OpenOptions::new()
-    .write(true)
-    .create(true)
-    .open(format!("Downloads/{}/state.json", out))
-    .unwrap();
+        .write(true)
+        .create(true)
+        .open(format!("Downloads/{}/state.json", out))
+        .unwrap();
     file.write_all(&serde_json::to_string(&resume).unwrap().into_bytes()[..]).unwrap();
 }
 
@@ -160,16 +207,12 @@ async fn load_state(out: &str) -> Resume {
     if !Path::new(&format!("Downloads/{}/state.json", out)).exists() {
         Resume { finished_segments: Vec::new() }
     } else {
-        let mut file = OpenOptions::new()
-        .read(true)
-        .open(format!("Downloads/{}/state.json", out))
-        .unwrap();
+        let mut file = OpenOptions::new().read(true).open(format!("Downloads/{}/state.json", out)).unwrap();
         let mut data: String = String::new();
         file.read_to_string(&mut data).unwrap();
         serde_json::from_str::<Resume>(&data).unwrap()
     }
 }
-
 
 pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file_name: &str, download_thread: usize) {
     for x in parse_master(hls_uri).await.unwrap().variants {

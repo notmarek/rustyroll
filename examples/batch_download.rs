@@ -23,7 +23,7 @@ async fn main() {
         &password,
     )
     .await;
-    let episodes: Wrapper<Episode> = cr.get_episodes("GR24GGE06").await;
+    let episodes: Wrapper<Episode> = cr.get_episodes("GY8VCP9ZX").await;
     for x in 0..episodes.items.as_ref().unwrap().len() {
         let episode_id: String = episodes.items.as_ref().unwrap()[x].id.as_ref().unwrap().clone();
         let episode: Episode = cr.get_episode(&episode_id).await;
