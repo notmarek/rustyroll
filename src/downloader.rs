@@ -82,15 +82,15 @@ async fn remux(out: &str, segments: u32) {
     }
     println!("Merging transport stream files.");
     merge(out, segments).await;
-    // println!("Fixing up the transport stream with ffmpeg.");
-    // Command::new("ffmpeg")
-    //     .arg("-i")
-    //     .arg(&format!("{}/full.ts", out))
-    //     .arg("-c")
-    //     .arg("copy")
-    //     .arg(&format!("{}/full.final.ts", out))
-    //     .output()
-    //     .unwrap();
+    println!("Fixing up the transport stream with ffmpeg.");
+    Command::new("ffmpeg")
+        .arg("-i")
+        .arg(&format!("{}/full.ts", out))
+        .arg("-c")
+        .arg("copy")
+        .arg(&format!("{}/full.final.ts", out))
+        .output()
+        .unwrap();
     println!("Multiplexing resources into Matroska.");
     Command::new("mkvmerge.exe")
         .args(vec![
