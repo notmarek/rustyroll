@@ -1,4 +1,5 @@
 use futures::{stream, StreamExt};
+use lava_torrent::torrent::v1::TorrentBuilder;
 use libaes::Cipher;
 use m3u8_rs::playlist::{MasterPlaylist, MediaPlaylist, Playlist};
 use serde::{Deserialize, Serialize};
@@ -10,6 +11,7 @@ use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use std::env;
 
 struct SegDownloaded {
     part_number: u128,
@@ -20,6 +22,23 @@ struct SegDownloaded {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Resume {
     finished_segments: Vec<u128>,
+}
+
+pub async fn create_torrent(out: &str) {
+    let torrent = TorrentBuilder::new(Path::new(&format!("{}/Downloads/{}.mkv", env::current_dir().unwrap().display(), out)), 1048576)
+        .set_announce(Some("http://nyaa.tracker.wf:7777/announce".to_string()))
+        .build()
+        .unwrap();
+    // let file = MetainfoBuilder::new()
+    //     .set_main_tracker(Some("http://nyaa.tracker.wf:7777/announce"))
+    //     .build(5, &format!("Downloads/{}.mkv", out), |progress| {
+    //         print!("\rCreating torrent - {:.0}%", progress * 100f64)
+    //     })
+    //     .unwrap();
+    // println!();
+    torrent.write_into_file(format!("Downloads/{}.torrent", out)).unwrap()
+    // let mut torrent = OpenOptions::new().write(true).create(true).open(format!("Downloads/{}.torrent", out)).unwrap();
+    //     torrent.write(&file[..]).unwrap();
 }
 
 async fn parse_master(hls_uri: &str) -> Option<MasterPlaylist> {
@@ -302,6 +321,7 @@ pub async fn download(hls_uri: &str, sub_uri: &str, quality: String, output_file
             generate_subs(sub_uri.to_string(), output_file_name).await;
             remux(&format!("Downloads/{}", output_file_name), segments.segments.len() as u32).await;
             cleanup(output_file_name).await; // cleanup the leftover files
+            create_torrent(output_file_name).await;
         }
     }
 }
